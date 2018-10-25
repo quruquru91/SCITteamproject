@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<typeAliases>
+		<typeAlias type="global.sesoc.team.vo.Business" alias="Business"/>
+		<typeAlias type="global.sesoc.team.vo.Employee" alias="Employee"/>
+		<typeAlias type="global.sesoc.team.vo.Item" alias="Item"/>
+		<typeAlias type="global.sesoc.team.vo.Order" alias="Order"/>
+		<typeAlias type="global.sesoc.team.vo.Receipt" alias="Receipt"/>
+		<typeAlias type="global.sesoc.team.vo.Schedule" alias="Schedule"/>
+	</typeAliases>
+	<mappers>
+		<mapper resource="mappers/employeeMapper.xml" />
+		<mapper resource="mappers/businessMapper.xml"/>
+		<mapper resource="mappers/scheduleMapper.xml"/>
+	</mappers>
+</configuration>

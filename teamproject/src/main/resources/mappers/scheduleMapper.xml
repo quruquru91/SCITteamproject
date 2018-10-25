@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="global.sesoc.team.dao.ScheduleMapper">
+
+	<select id="selectAll" resultType="Schedule">
+		select * from schedule
+	</select>
+
+
+	<delete id="deleteSchedule" parameterType="int">
+		delete from schedule
+		where scheduleNo =#{scheduleNo}
+	</delete>
+
+
+	<select id="selectMySchedule" resultType="Schedule"
+		parameterType="String">
+		select s.* from schedule s, business b
+		where
+		s.businessNo=b.businessNo and b.empId=#{value}
+	</select>
+
+	<insert id="insertPlan" parameterType="Schedule">
+		INSERT INTO schedule
+		values(
+		#{businessNo},
+		schedule_seq.nextval,
+		#{scheduleTitle},
+		#{scheduleDay},
+		#{scheduleContext},
+		#{schedulePlace}
+		)
+
+	</insert>
+
+
+
+	<select id="selectBusinessWith" parameterType="map"
+		resultType="Integer">
+		select businessWith from business
+		where empId=#{empId}
+		and
+		#{selectDate} between businessStart and businessEnd
+
+	</select>
+
+	<select id="selectBusinessNos" parameterType="int"
+		resultType="int">
+		select businessNo from business
+		where businessWith =
+		#{value}
+	</select>
+
+	<select id="selectBusinessNo" parameterType="map"
+		resultType="Integer">
+		select businessNo from business
+		where empId =#{empId}
+		and
+		businessWith=#{businessWith}
+	</select>
+
+	<select id="init" parameterType="String" resultType="Schedule">
+
+		select * from schedule where
+		scheduleNo=
+		(select max(scheduleNo) from schedule
+		where scheduleDay=#{value}
+		group by scheduleDay)
+	</select>
+
+	<select id="selectScheduleOne" parameterType="int"
+		resultType="Schedule">
+		select
+		businessNo,scheduleNo,scheduleTitle,to_char(scheduleDay,'yyyy-mm-dd')scheduleDay,scheduleContext,schedulePlace
+		from schedule
+		where scheduleNo=#{value}
+	</select>
+
+
+	<update id="updateSchedule" parameterType="Schedule">
+		update schedule set
+		scheduleTitle= #{scheduleTitle},
+		scheduleContext=#{scheduleContext},
+		schedulePlace= #{schedulePlace}
+		where scheduleNo = #{scheduleNo}
+	</update>
+
+
+	<select id="selectBusinessWithNo" parameterType="String"
+		resultType="int">
+		select businessWith from business where empId=#{empId}
+	</select>
+
+	<select id="selectBusinessNoRepresenter" parameterType="int"
+		resultType="int">
+		select businessNo from business where businessRepresent = 'true' and
+		businessWith=#{value}
+	</select>
+
+	<select id="selectRepresentSchedule" parameterType="int"
+		resultType="Schedule">
+		select * from schedule where businessNo = #{value}
+	</select>
+
+	<select id="selectScheduleNo" resultType="int">
+		select max(ScheduleNo) from schedule
+	</select>
+
+	<select id="updateCheck" parameterType="int" resultType="String">
+		select empId from business where businessRepresent ='true' and
+		businessNo = (select businessNo from schedule where scheduleNo =
+		#{scheduleNo})
+	</select>
+
+	<select id='checkScheduleNo' parameterType="map"
+		resultType='int'>
+		select MAX(scheduleNo) from schedule where businessno= (select businessNo
+		from business where empId=#{empId} and #{scheduleDay} between
+		businessStart and businessEnd and businessRepresent ='true')
+	</select>
+	
+	<select id ="checkRepresenter" parameterType="int" resultType="String">
+		select empId from business where businessNo = (select businessNo from schedule where scheduleNo =#{value})
+	</select>
+
+</mapper>

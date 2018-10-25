@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="global.sesoc.team.dao.BusinessMapper">
+	<select id="selectAll" resultType="Business">
+		select * from Business
+	</select>
+
+	<insert id="insertBusiness" parameterType="Business">
+		insert into business
+		(
+			empId, businessNo, businessName, businessWith, businessColor, businessStart, businessEnd,
+			businessLocationMain, businessLocationSub, businessMemo, businessRepresent
+		)
+		values(
+			#{empId}
+			,business_seq.nextval
+			,#{businessName}
+			,#{businessWith}
+			,#{businessColor}
+			,#{businessStart}
+			,#{businessEnd}
+			,#{businessLocationMain}
+			,#{businessLocationSub}
+			,#{businessMemo}
+			,#{businessRepresent}
+		)
+	</insert>
+
+	<select id="businessMy" resultType="Business" parameterType="String">
+		select 
+			* 
+		from 
+			business
+		where
+			empId=#{value}
+	</select>
+
+	<select id="selectBusinessWith" resultType="int">
+		select 
+			max(businessWith) 
+		from 
+			business
+	</select>
+
+	<delete id="deleteBusinessNo" parameterType="map">
+		delete from business where businessNo=ANY(select businessNo from business
+		where businessWith = (select businessWith from business where
+		empId=#{empId} and #{selectDate} between businessStart and
+		businessEnd))
+	</delete>
+
+	<select id="checkRepresent" parameterType="String" resultType="String">
+		select empId from business where businessWith =#{value} and
+		businessRepresent ='true'
+	</select>
+
+	<select id="checkBusiness" parameterType="map" resultType="int">
+		select businessNo from business where #{selectDate} between
+		businessStart and businessEnd and empId=#{empId}
+	</select>
+
+	<select id="selectRepersenter" parameterType="map" resultType="String">
+		select empId from business where businessWith = (select
+		businessWith from business where #{selectDate} between businessStart
+		and businessEnd and empId=#{empId}) and businessRepresent ='true'
+	</select>
+
+	<select id="alreadyBusiness" parameterType="map" resultType="int">
+		select businessNo from business 
+		where 
+			(#{startDate} between businessStart and businessEnd and empId=#{empId}) 
+		or 
+			(#{endDate} between businessStart and businessEnd and empId=#{empId})
+		or
+			(businessStart between #{startDate} and #{endDate} and empId=#{empId})
+	</select>
+
+	<select id="selectBusinessDelete" parameterType="map" resultType="int">
+		select businessNo from business where businessWith =#{businessWith} and
+		empId =#{empId}
+	</select>
+
+	<select id="selectScheduleDelete" parameterType="map" resultType="int">
+		select scheduleNo from schedule where businessNo = (select businessNo from
+		business where businessWith =#{businessWith} and empId =#{empId})
+	</select>
+
+	<insert id="insertReceipt" parameterType="Receipt">
+		insert into recipe
+		(
+			scheduleno,
+			recipeno,
+			recipeday,
+			recipeplace,
+			recipepay,
+			recipememo
+		)
+		values
+		(
+			#{scheduleNo},
+			recipe_seq.nextval,
+			#{recipeDay},
+			#{recipePlace},
+			#{recipePay},
+			#{recipeMemo}
+		)
+	</insert>
+	
+	<select id="selectReceiptNo" resultType="int">
+		select
+			max(recipeno)
+		from
+			recipe
+	</select>
+	
+	<insert id="insertItem" parameterType="Item">
+		insert into item
+		(
+			recipeno
+			, itemno
+			, itemcategory
+			, itemname
+			, itemcount
+			, itemprice
+		)
+		values
+		(
+			#{recipeNo},
+			item_seq.nextval,
+			#{itemCategory},
+			#{itemName},
+			#{itemCount},
+			#{itemPrice}
+		)
+	</insert>
+</mapper>
+ 
+ 

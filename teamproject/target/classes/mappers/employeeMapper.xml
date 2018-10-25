@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="global.sesoc.team.dao.EmployeeMapper">
+	<select id="login" parameterType="Employee" resultType="Employee">
+		SELECT * FROM employee
+		WHERE 
+			empid = #{empid}
+		<if test="emppassword != null">	
+		AND
+			emppassword = #{emppassword}
+		</if>		
+	</select>
+	
+	<select id="selectEmpAll" parameterType="int" resultType="Employee">
+		SELECT * FROM employee
+		WHERE 
+			companyno = #{companyno}
+	</select>
+	
+	<select id="selectAllTrip" parameterType="string" resultType="map">
+		SELECT bu.businessname, bu.businessstart, bu.businessend, bu.businessno, bu.businesswith, bu.businesslocationmain
+		FROM employee emp , business bu
+		WHERE 
+			emp.empid = bu.empid 
+		AND
+			emp.empid = #{value}
+	</select>
+	
+	<update id="updateEmployee" parameterType="Employee">
+		UPDATE employee 
+		SET
+			companyno = #{companyno},
+			empname = #{empname},
+			emppassword = #{emppassword},
+			empdept = #{empdept},
+			empphone = #{empphone}
+		WHERE
+			empid = #{empid}	
+	</update>
+	
+	<insert id="insertEmployee" parameterType="Employee">
+		INSERT INTO employee 
+		VALUES(
+			#{companyno},
+			#{empid},
+			#{emppassword},
+			#{empname},
+			#{empdept},
+			'employee',
+			#{empphone}
+		)
+	</insert>
+	
+	<select resultType="Employee" parameterType="map" id="searchName">
+		SELECT * FROM employee
+		WHERE
+			companyno = #{companyno}
+		AND
+			empname like '%' ||#{empname}|| '%' 
+	</select>
+	
+	<select id="selectBusiness" parameterType="string" resultType="Business">
+		SELECT * FROM business
+		WHERE
+			businesswith = #{value}
+		AND	
+			businessrepresent = 'true'
+	</select>
+
+	<select id="selectSchedules" parameterType="int" resultType="Schedule">
+		SELECT * FROM schedule
+		WHERE
+    		businessno = #{value}
+	</select>
+	
+	<select id="selectScheduleDays" parameterType="int" resultType="string">    
+		SELECT TO_CHAR(scheduleday,'YYYY-MM-DD') scheduleday FROM schedule
+		WHERE 
+			businessno = #{value}
+		GROUP BY scheduleday
+		ORDER BY scheduleday
+	</select>
+	
+	<select id="selectAllitems" parameterType="map" resultType="map">
+		SELECT
+			re.recipeday recipeday,
+			re.recipeplace recipeplace,
+			re.recipepay recipepay,
+			re.recipememo recipememo,
+			it.itemcategory itemcategory,
+			it.itemcount itemcount,
+			it.itemprice itemprice,
+			it.itemname itemname  
+		FROM 
+			recipe re,schedule sc, item it
+		WHERE 
+   			re.scheduleno = sc.scheduleno 
+   		AND
+    		it.recipeno = re.recipeno
+    	AND 
+    		sc.businessno = #{businessNumber}
+    	AND
+    		sc.scheduleday = #{date}
+	</select>
+	
+	<select id="selectAllitems2" parameterType="int" resultType="map">
+		SELECT
+			re.recipeno recipeno,
+			re.recipeday recipeday,
+			re.recipeplace recipeplace,
+			re.recipepay recipepay,
+			re.recipememo recipememo,
+			it.itemcategory itemcategory,
+			it.itemcount itemcount,
+			it.itemprice itemprice,
+			it.itemname itemname  
+		FROM 
+			recipe re,schedule sc, item it
+		WHERE 
+   			re.scheduleno = sc.scheduleno 
+   		AND
+    		it.recipeno = re.recipeno
+    	AND 
+    		sc.businessno = #{businessNumber}
+    	ORDER BY re.recipeday	
+	</select>
+	
+	<select id="selectAllitems3" parameterType="int" resultType="map">
+		SELECT
+			TO_CHAR(re.recipeday,'YYYY-MM-DD') recipeday,
+			it.itemcategory itemcategory,
+			sum(it.itemcount*it.itemprice) finalprice
+		FROM 
+			recipe re,schedule sc, item it
+		WHERE 
+   			re.scheduleno = sc.scheduleno 
+   		AND
+    		it.recipeno = re.recipeno
+    	AND 
+    		sc.businessno = #{value}
+        GROUP BY 
+            re.recipeday, it.itemcategory
+        ORDER BY 
+            re.recipeday
+	</select>
+	
+	<select id="selectCompanyItems" parameterType="string" resultType="map">
+		SELECT
+			re.recipeday recipeday,
+			re.recipeplace recipeplace,
+			re.recipepay recipepay,
+			re.recipememo recipememo,
+			it.itemcategory itemcategory,
+			it.itemcount itemcount,
+			it.itemprice itemprice,
+			it.itemname itemname  
+		FROM 
+			company co, employee em, business bu, schedule sc, recipe re, item it
+		WHERE
+            co.companyno = em.companyno 
+   		AND
+            em.empid = bu.empid 
+   		AND
+            bu.businessno = sc.businessno 
+   		AND
+   			sc.scheduleno = re.scheduleno  
+   		AND
+            re.recipeno = it.recipeno 
+    	AND 
+            co.companyno = #{value}
+    	ORDER BY re.recipeday
+	</select>
+	
+	<select id="selectLocationItems" parameterType="map" resultType="map">
+	    SELECT
+			re.recipeday recipeday,
+			re.recipeplace recipeplace,
+			re.recipepay recipepay,
+			re.recipememo recipememo,
+			it.itemcategory itemcategory,
+			it.itemcount itemcount,
+			it.itemprice itemprice,
+			it.itemname itemname  
+		FROM 
+			company co, employee em, business bu, schedule sc, recipe re, item it
+		WHERE
+            co.companyno = em.companyno 
+   		AND
+            em.empid = bu.empid 
+   		AND
+            bu.businessno = sc.businessno 
+   		AND
+   			sc.scheduleno = re.scheduleno  
+   		AND
+            re.recipeno = it.recipeno 
+    	AND 
+            co.companyno = #{companyNo}
+        AND
+            bu.businesslocationmain = #{location}
+    	ORDER BY re.recipeday
+	</select>
+	
+	<select id="selectLocation" parameterType="string" resultType="string">
+		SELECT DISTINCT
+			bu.businesslocationmain
+		FROM 
+			company co, employee em, business bu
+		WHERE
+   			 co.companyno = em.companyno 
+		AND
+   			 em.empid = bu.empid
+		AND
+    		 co.companyno = #{value}
+	</select>
+	
+	<select id="selectCategory" parameterType="map" resultType="map">
+		SELECT ROUND(a.totalprice/b.totalprice,3) proportion, a.businesslocationmain 
+        from (
+	    SELECT
+			SUM(it.itemcount * it.itemprice) totalprice,
+			bu.businesslocationmain businesslocationmain
+		FROM 
+			company co, employee em, business bu, schedule sc, recipe re, item it
+		WHERE
+            co.companyno = em.companyno 
+   		AND
+            em.empid = bu.empid 
+   		AND
+            bu.businessno = sc.businessno 
+   		AND
+   			sc.scheduleno = re.scheduleno  
+   		AND
+            re.recipeno = it.recipeno 
+    	AND 
+            co.companyno = #{companyNo}
+        GROUP BY bu.businesslocationmain 
+        ) b,
+        (  SELECT
+			SUM(it.itemcount * it.itemprice) totalprice,
+			bu.businesslocationmain
+		FROM 
+			company co, employee em, business bu, schedule sc, recipe re, item it
+		WHERE
+            co.companyno = em.companyno 
+   		AND
+            em.empid = bu.empid 
+   		AND
+            bu.businessno = sc.businessno 
+   		AND
+   			sc.scheduleno = re.scheduleno  
+   		AND
+            re.recipeno = it.recipeno 
+    	AND 
+            co.companyno =  #{companyNo}
+        AND
+            it.itemcategory = #{category}
+        GROUP BY bu.businesslocationmain 
+        ) a
+        WHERE
+            a.businesslocationmain = b.businesslocationmain
+	</select>
+	
+	<select id="selectDays" parameterType="map" resultType="string">
+		SELECT SUM((businessend - businessstart)+1) businessdays 
+		FROM business bu, company co 
+		WHERE 
+    		businesslocationmain = #{location}
+		AND 
+    		companyno = #{companyNo}
+	</select>
+	
+	<select id="selectDays2" parameterType="map" resultType="string">
+		SELECT SUM((businessend - businessstart)+1) businessdays 
+		FROM business bu, company co 
+		WHERE 
+    		businesslocationmain = #{location}
+		AND 
+    		companyno = #{companyNo}
+    	AND
+    		businessWith= #{businessWith}
+	</select>
+	
+	<select id="selectCompanyCoworker" parameterType="map"
+		resultType="Employee">
+		SELECT * FROM employee
+		WHERE
+		companyno = #{companyno} and
+		NOT empId = #{empId}
+	</select>
+	
+	<select id="selectYear" parameterType="string" resultType="string">
+		SELECT DISTINCT * FROM 
+	    (SELECT
+			TO_CHAR(re.recipeday, 'YYYY') years
+		FROM 
+			company co, employee em, business bu, schedule sc, recipe re, item it
+		WHERE
+            co.companyno = em.companyno 
+   		AND
+            em.empid = bu.empid 
+   		AND
+            bu.businessno = sc.businessno 
+   		AND
+   			sc.scheduleno = re.scheduleno  
+   		AND
+            re.recipeno = it.recipeno 
+    	AND 
+            co.companyno = #{value}
+    	ORDER BY re.recipeday)
+	</select>
+	
+	<select id="selectYearData" parameterType="map" resultType="map">
+		SELECT
+			re.recipeday recipeday,
+			re.recipeplace recipeplace,
+			re.recipepay recipepay,
+			re.recipememo recipememo,
+			it.itemcategory itemcategory,
+			it.itemcount itemcount,
+			it.itemprice itemprice,
+			it.itemname itemname  
+		FROM 
+			company co, employee em, business bu, schedule sc, recipe re, item it
+		WHERE
+            co.companyno = em.companyno 
+   		AND
+            em.empid = bu.empid 
+   		AND
+            bu.businessno = sc.businessno 
+   		AND
+   			sc.scheduleno = re.scheduleno  
+   		AND
+            re.recipeno = it.recipeno 
+    	AND 
+            co.companyno = #{companyNo}
+        AND
+            bu.businessstart LIKE #{year}||'%'
+    	ORDER BY re.recipeday
+	
+	</select>
+	
+</mapper>
